@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>赛博网盘 - CYBER CLOUD</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:"Segoe UI",Roboto,monospace}
+body{background:#050508;color:#e0e0ff;min-height:100vh;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(circle at 50% 50%,#101025,#050508);z-index:-2}
+body::after{content:"";position:fixed;top:0;left:0;width:100%;height:100%;background-image:
+linear-gradient(transparent 95%,rgba(0,255,255,0.05) 95%),
+linear-gradient(90deg,rgba(255,0,200,0.03) 1px,transparent 1px);
+background-size:100% 40px,40px 100%;z-index:-1;opacity:0.3}
+
+/* 导航 */
+.navbar{background:rgba(10,10,20,0.85);backdrop-filter:blur(12px);padding:1rem 2rem;display:flex;
+justify-content:space-between;align-items:center;position:sticky;top:0;z-index:999;
+border-bottom:1px solid rgba(0,220,255,0.2);box-shadow:0 0 30px rgba(0,150,255,0.15)}
+.logo{font-size:1.5rem;font-weight:700;color:#0ff;text-shadow:0 0 10px #0ff,0 0 25px #0ff;letter-spacing:2px}
+.user{color:#f0f;font-size:0.9rem;text-shadow:0 0 10px #f0f}
+
+/* 打字机故障文字 */
+.typewriter{position:relative;display:inline-block;overflow:hidden;white-space:nowrap;
+animation:typing 3s steps(30, end), blink-caret 0.75s step-end infinite}
+.typewriter::after{content:attr(data-text);position:absolute;top:0;left:0;
+width:100%;height:100%;color:#f0f;overflow:hidden;clip:rect(0, 900px, 0, 0);
+animation:glitch-anim 2s infinite linear alternate-reverse}
+@keyframes typing{from{width:0}to{width:100%}}
+@keyframes blink-caret{from,to{border-color:transparent}50%{border-color:#0ff}}
+@keyframes glitch-anim{0%{clip:rect(36px, 9999px, 9px, 0)}5%{clip:rect(12px, 9999px, 45px, 0)}10%{clip:rect(48px, 9999px, 77px, 0)}15%{clip:rect(42px, 9999px, 73px, 0)}20%{clip:rect(63px, 9999px, 86px, 0)}25%{clip:rect(36px, 9999px, 90px, 0)}30%{clip:rect(66px, 9999px, 73px, 0)}35%{clip:rect(10px, 9999px, 94px, 0)}40%{clip:rect(2px, 9999px, 48px, 0)}45%{clip:rect(82px, 9999px, 73px, 0)}50%{clip:rect(54px, 9999px, 84px, 0)}55%{clip:rect(28px, 9999px, 99px, 0)}60%{clip:rect(59px, 9999px, 50px, 0)}65%{clip:rect(41px, 9999px, 62px, 0)}70%{clip:rect(2px, 9999px, 82px, 0)}75%{clip:rect(30px, 9999px, 71px, 0)}80%{clip:rect(15px, 9999px, 98px, 0)}85%{clip:rect(66px, 9999px, 30px, 0)}90%{clip:rect(85px, 9999px, 72px, 0)}95%{clip:rect(71px, 9999px, 75px, 0)}100%{clip:rect(74px, 9999px, 47px, 0)}}
+
+/* 上传区 */
+.container{max-width:1100px;margin:3rem auto;padding:0 1rem}
+.upload-box{background:rgba(12,12,24,0.7);border:2px solid rgba(0,255,255,0.2);border-radius:16px;
+padding:2.5rem 2rem;text-align:center;position:relative;overflow:hidden;transition:all 0.3s}
+.upload-box::before{content:"";position:absolute;top:0;left:-100%;width:100%;height:100%;
+background:linear-gradient(90deg,transparent,rgba(0,200,255,0.08),transparent);transition:0.6s}
+.upload-box:hover::before{left:100%}
+.upload-box:hover{border-color:#0ff;box-shadow:0 0 35px rgba(0,255,255,0.25)}
+.upload-box h3{color:#fff;font-size:1.4rem;margin-bottom:0.5rem;text-shadow:0 0 10px #0ff}
+.upload-box p{color:#aaf;margin-bottom:1rem}
+.upload-box input{display:none}
+.upload-label{display:inline-block;padding:0.9rem 2.4rem;background:linear-gradient(90deg,#00ccff,#ff00cc);
+color:#000;font-weight:bold;border-radius:10px;cursor:pointer;transition:0.3s;box-shadow:0 0 15px rgba(0,200,255,0.3)}
+.upload-label:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(255,0,200,0.35)}
+
+/* 文件列表 */
+.file-list{background:rgba(12,12,24,0.7);border-radius:16px;overflow:hidden;
+border:1px solid rgba(100,100,255,0.15);box-shadow:0 0 40px rgba(0,100,255,0.1)}
+.list-header{padding:1.2rem 1.6rem;background:rgba(20,20,40,0.9);font-weight:bold;
+display:flex;justify-content:space-between;border-bottom:1px solid rgba(0,255,255,0.15);
+color:#0ff;text-shadow:0 0 8px #0ff}
+
+/* 文件项 */
+.file-item{padding:1.2rem 1.6rem;display:flex;justify-content:space-between;align-items:center;
+border-bottom:1px solid rgba(80,80,120,0.2);position:relative;transition:all 0.25s}
+.file-item:hover{background:rgba(0,180,255,0.08);transform:scale(1.01);
+box-shadow:inset 0 0 0 1px rgba(0,255,255,0.3)}
+.file-name{display:flex;align-items:center;gap:1rem;cursor:pointer}
+
+/* 文件图标 */
+.file-icon{width:30px;height:30px;border-radius:6px;display:grid;place-items:center;
+font-weight:bold;font-size:12px;color:#000;box-shadow:0 0 12px currentColor}
+.icon-img{background:#0f0;color:#000;box-shadow:0 0 12px #0f0}
+.icon-video{background:#fa0;color:#000;box-shadow:0 0 12px #fa0}
+.icon-audio{background:#c0f;color:#000;box-shadow:0 0 12px #c0f}
+.icon-doc{background:#08f;color:#000;box-shadow:0 0 12px #08f}
+.icon-zip{background:#f30;color:#000;box-shadow:0 0 12px #f30}
+.icon-other{background:#889;color:#000}
+
+.file-size{color:#88a;font-size:0.8rem;margin-top:4px}
+.action-group{display:flex;gap:0.6rem}
+
+/* 按钮 */
+.download-btn,.del-btn,.view-btn{padding:0.5rem 1.1rem;border:none;border-radius:8px;font-weight:bold;
+cursor:pointer;transition:all 0.25s;font-size:0.85rem}
+.view-btn{background:linear-gradient(90deg,#44ce7b,#22c55e);color:#fff}
+.view-btn:hover{transform:translateY(-2px);box-shadow:0 5px 15px rgba(0,255,100,0.4)}
+.download-btn{background:linear-gradient(90deg,#00ccff,#0066ff);color:#fff}
+.download-btn:hover{transform:translateY(-2px);box-shadow:0 5px 15px rgba(0,150,255,0.4)}
+.del-btn{background:linear-gradient(90deg,#ff2266,#aa0044);color:#fff}
+.del-btn:hover{transform:translateY(-2px);box-shadow:0 5px 15px rgba(255,0,100,0.4)}
+
+.footer{text-align:center;padding:3rem 1rem;color:#66a;font-size:0.85rem;opacity:0.7}
+
+/* 预览弹窗 */
+.preview-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,10,0.85);
+backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:9999;
+opacity:0;pointer-events:none;transition:all 0.3s}
+.preview-modal.show{opacity:1;pointer-events:auto}
+.preview-box{background:#121225;border:2px solid #0ff;border-radius:16px;max-width:850px;
+width:90%;max-height:80vh;overflow:auto;box-shadow:0 0 60px rgba(0,255,255,0.3);position:relative}
+.preview-header{padding:1rem;border-bottom:1px solid #0ff4;display:flex;justify-content:space-between;align-items:center}
+.preview-title{color:#0ff;text-shadow:0 0 10px #0ff}
+.close-btn{background:#ff0062;color:#fff;border:none;border-radius:6px;padding:0.4rem 1rem;cursor:pointer}
+.preview-content{padding:1.5rem;display:flex;justify-content:center;align-items:center;min-height:300px}
+.preview-content img{max-width:100%;max-height:70vh;border-radius:8px}
+.preview-content video,.preview-content audio{max-width:100%;border-radius:8px}
+.preview-content .text{background:#0a0a18;color:#eef;padding:1rem;border-radius:8px;width:100%;max-height:500px;overflow-y:auto}
+</style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="logo">CYBER CLOUD</div>
+    <div class="user typewriter" data-text="" id="userName">欢迎登录</div>
+</div>
+
+<div class="container">
+    <div class="upload-box">
+        <h3 class="typewriter" data-text="上传文件至赛博网盘">上传文件至赛博网盘</h3>
+        <p>支持所有格式，高速存储</p>
+        <label for="fileInput" class="upload-label">选择文件</label>
+        <input type="file" id="fileInput" multiple>
+    </div>
+
+    <div class="file-list">
+        <div class="list-header">
+            <span class="typewriter" data-text="文件列表">文件列表</span>
+            <span>操作</span>
+        </div>
+        <div id="fileContainer"></div>
+    </div>
+</div>
+
+<!-- 预览弹窗 -->
+<div class="preview-modal" id="previewModal">
+    <div class="preview-box">
+        <div class="preview-header">
+            <div class="preview-title" id="previewTitle">文件预览</div>
+            <button class="close-btn" onclick="closePreview()">关闭</button>
+        </div>
+        <div class="preview-content" id="previewContent"></div>
+    </div>
+</div>
+
+<div class="footer">CYBER CLOUD © 2077</div>
+
+<script>
+const fileInput = document.getElementById('fileInput');
+const fileContainer = document.getElementById('fileContainer');
+const previewModal = document.getElementById('previewModal');
+const previewContent = document.getElementById('previewContent');
+const previewTitle = document.getElementById('previewTitle');
+const userName = document.getElementById('userName');
+let fileList = [];
+let currentFile = null;
+
+// ========== 【显示用户名】核心代码 ==========
+const loginUser = localStorage.getItem('registeredUser') || '访客';
+userName.textContent = `用户：${loginUser}`;
+userName.setAttribute('data-text', userName.textContent);
+
+// 上传
+fileInput.addEventListener('change', e => {
+    const files = e.target.files;
+    if(!files.length) return;
+    for(let file of files){
+        fileList.push(file);
+        renderFile(file, fileList.length - 1);
+    }
+});
+
+// 渲染文件
+function renderFile(file, index){
+    const item = document.createElement('div');
+    item.className = 'file-item';
+    const size = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+    const t = getType(file.name);
+
+    item.innerHTML = `
+    <div class="file-name" onclick="previewFile(${index})">
+        <div class="file-icon icon-${t.type}">${t.text}</div>
+        <div>
+            <div>${file.name}</div>
+            <div class="file-size">${size}</div>
+        </div>
+    </div>
+    <div class="action-group">
+        <button class="view-btn" onclick="previewFile(${index})">预览</button>
+        <button class="download-btn">下载</button>
+        <button class="del-btn">删除</button>
+    </div>`;
+
+    fileContainer.appendChild(item);
+
+    // 下载
+    item.querySelector('.download-btn').onclick = () => {
+        const url = URL.createObjectURL(file);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file.name;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    // 删除
+    item.querySelector('.del-btn').onclick = () => {
+        if(confirm('确认删除？')){
+            fileList.splice(index, 1);
+            refresh();
+        }
+    };
+}
+
+// 预览文件
+function previewFile(index){
+    const file = fileList[index];
+    currentFile = file;
+    previewTitle.textContent = file.name;
+    const url = URL.createObjectURL(file);
+    const ext = file.name.split('.').pop().toLowerCase();
+
+    previewContent.innerHTML = '';
+
+    // 图片
+    if(['jpg','jpeg','png','gif','webp','bmp'].includes(ext)){
+        previewContent.innerHTML = `<img src="${url}" alt="预览">`;
+    }
+    // 视频
+    else if(['mp4','mov','avi','mkv','flv','wmv'].includes(ext)){
+        previewContent.innerHTML = `<video controls src="${url}"></video>`;
+    }
+    // 音频
+    else if(['mp3','wav','flac','aac','ogg'].includes(ext)){
+        previewContent.innerHTML = `<audio controls src="${url}"></audio>`;
+    }
+    // 文本
+    else if(['txt','html','css','js','json','md'].includes(ext)){
+        const reader = new FileReader();
+        reader.onload = e => {
+            previewContent.innerHTML = `<div class="text">${e.target.result.replace(/</g, '&lt;')}</div>`;
+        };
+        reader.readAsText(file);
+    }
+    else {
+        previewContent.innerHTML = `<div style="color:#f66">不支持预览此格式</div>`;
+    }
+
+    previewModal.classList.add('show');
+}
+
+// 关闭预览
+function closePreview(){
+    previewModal.classList.remove('show');
+    setTimeout(() => {
+        previewContent.innerHTML = '';
+    }, 300);
+}
+
+// 刷新列表
+function refresh(){
+    fileContainer.innerHTML = '';
+    fileList.forEach((f,i) => renderFile(f,i));
+}
+
+// 获取文件类型
+function getType(name){
+    const e = name.split('.').pop().toLowerCase();
+    if(['jpg','jpeg','png','gif','webp'].includes(e)) return {type:'img',text:'IMG'};
+    if(['mp4','mov','avi','mkv'].includes(e)) return {type:'video',text:'VID'};
+    if(['mp3','wav','flac'].includes(e)) return {type:'audio',text:'AUD'};
+    if(['doc','pdf','txt','xls'].includes(e)) return {type:'doc',text:'DOC'};
+    if(['zip','rar','7z'].includes(e)) return {type:'zip',text:'ZIP'};
+    return {type:'other',text:'FILE'};
+}
+</script>
+</body>
+</html>
